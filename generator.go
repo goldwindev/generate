@@ -90,6 +90,14 @@ func (g *Generator) processReference(schema *Schema) (string, error) {
 	return refSchema.GeneratedType, nil
 }
 
+func isNullable(types []string) bool {
+	if len(types) < 1 {
+		return false
+	}
+
+	return types[len(types)-1] == "null"
+}
+
 // returns the type refered to by schema after resolving all dependencies
 func (g *Generator) processSchema(schemaName string, schema *Schema) (typ string, err error) {
 	if len(schema.Definitions) > 0 {
@@ -127,6 +135,11 @@ func (g *Generator) processSchema(schemaName string, schema *Schema) (typ string
 				if err != nil {
 					return "", err
 				}
+
+				if isMultiType && isNullable(types) {
+					return "*" + rv, nil
+				}
+
 				if !isMultiType {
 					return rv, nil
 				}
